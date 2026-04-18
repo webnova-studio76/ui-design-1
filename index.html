@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebNova Studio UI - Particle Edition</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #1a0b2e 0%, #050505 100%);
+      color: white;
+      overflow-x: hidden;
+      padding: 20px 0; /* Added padding for mobile scrolling */
+    }
+
+    #particleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      width: 90%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      margin: 30px 0 15px;
+      letter-spacing: 2px;
+      font-size: 1rem; /* Slightly smaller for mobile */
+      opacity: 0.8;
+      text-transform: uppercase;
+      text-align: left;
+    }
+
+    .grid {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      flex: 1 1 calc(33.333% - 15px); /* Default 3 columns */
+      min-width: 250px;
+      padding: 25px;
+      text-align: center;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .card:hover {
+      transform: translateY(-5px) scale(1.01);
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .big {
+      max-width: 100%; /* Fill container width on mobile */
+      width: fit-content;
+      margin-bottom: 10px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border-left: 4px solid #3a86ff;
+      text-align: left;
+    }
+
+    .highlight {
+      background: rgba(255, 0, 110, 0.2);
+      border: 1px solid rgba(255, 0, 110, 0.4);
+      font-weight: bold;
+    }
+
+    /* --- MOBILE RESPONSIVENESS --- */
+    @media (max-width: 768px) {
+      .container {
+        width: 95%;
+      }
+      
+      h2 {
+        font-size: 0.9rem;
+        margin: 20px 0 10px;
+      }
+
+      .card {
+        flex: 1 1 100%; /* Stack cards vertically on small screens */
+        padding: 20px;
+        min-width: unset; /* Remove min-width to allow full shrinking */
+      }
+
+      .big {
+        font-size: 1rem;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particleCanvas"></canvas>
+
+  <div class="container">
+    <h2>WEBNOVA STUDIO PRESENTS</h2>
+    <div class="card big">🚀 RR WEB DESIGNERS</div>
+
+    <h2>CODE CRAFT ACADEMIC</h2>
+    <div class="grid">
+      <div class="card">💻 WEB DESIGN</div>
+      <div class="card">🎨 UI / UX DESIGN</div>
+      <div class="card">📚 TUTORIALS</div>
+      <div class="card">⚡ FRONTEND SKILLS</div>
+      <div class="card">🌐 RESPONSIVE DESIGN</div>
+    </div>
+
+    <h2>ABOUT</h2>
+    <div class="grid">
+      <div class="card">
+        Learn modern web design with easy tutorials. Build creative and responsive websites step by step.
+      </div>
+
+      <div class="card">
+        Start from basics and grow into a professional web designer with practical learning and real projects.
+      </div>
+
+      <div class="card highlight">
+        Designed by Rashmi Divantgi ✨
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let particles = [];
+    let particleCount = window.innerWidth < 768 ? 30 : 60; // Fewer particles on mobile for performance
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', () => {
+      resize();
+      // Re-initialize particles on resize to prevent visual glitches
+      particles = [];
+      createParticles();
+    });
+    
+    resize();
+
+    class Particle {
+      constructor() {
+        this.init();
+      }
+
+      init() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height + canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedY = Math.random() * -1.2 - 0.3;
+        this.speedX = Math.random() * 0.6 - 0.3;
+        this.opacity = Math.random() * 0.8 + 0.1;
+        const colors = ['#3a86ff', '#8338ec', '#ff006e', '#00f2ff'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX;
+        if (this.y < -10) {
+          this.y = canvas.height + 10;
+          this.x = Math.random() * canvas.width;
+        }
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = this.opacity;
+        ctx.shadowBlur = 5; // Reduced blur for mobile performance
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+
+    function createParticles() {
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    createParticles();
+    animate();
+  </script>
+</body>
+</html>
